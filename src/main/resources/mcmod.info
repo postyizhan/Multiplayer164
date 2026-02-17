@@ -1,0 +1,14 @@
+[
+  {
+    "modid": "Multiplayer164",
+    "name": "Multiplayer164",
+    "description": "Enhanced LAN sharing and configuration for Minecraft 1.6.4",
+    "version": "1.0.0",
+    "mcversion": "1.6.4",
+    "url": "https://github.com/postyizhan/Multiplayer164",
+    "updateUrl": "",
+    "authorList": ["postyizhan"],
+    "credits": "",
+    "logoFile": ""
+  }
+]
