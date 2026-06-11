@@ -13,6 +13,7 @@ multiplayer164.guest.empty=请输入邀请码。
 multiplayer164.guest.connecting=正在加入房间...
 multiplayer164.guest.starting=正在建立连接...
 multiplayer164.guest.joined=已加入房间！请在局域网列表中双击「Terracotta Lobby」加入。备用地址：%s
+multiplayer164.guest.auto_connecting=已加入房间，正在自动连接本地大厅：%s
 multiplayer164.region=注意：联机服务目前仅对中国大陆地区可用。
 multiplayer164.error.platform=当前平台暂不支持联机（仅支持 64 位 Windows）。
 multiplayer164.error.generic=联机出错：%s

@@ -8,6 +8,8 @@ import com.github.postyizhan.multiplayer164.util.I18n;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.multiplayer.GuiConnecting;
+import net.minecraft.client.multiplayer.ServerAddress;
 
 /**
  * Guest-side screen: enter an invitation code and join the host's room via Terracotta.
@@ -25,6 +27,9 @@ public class GuiJoinRoom extends GuiScreen {
     private volatile String errorMessage;
     private volatile boolean joined;
     private volatile boolean joining;
+    private volatile boolean connectRequested;
+    private volatile String connectHost;
+    private volatile int connectPort;
 
     public GuiJoinRoom(GuiScreen parent) {
         this.parentScreen = parent;
@@ -79,9 +84,14 @@ public class GuiJoinRoom extends GuiScreen {
             public void onState(TerracottaState state) {
                 if (state.kind == TerracottaState.Kind.GUEST_OK) {
                     joined = true;
-                    status = I18n.trf("multiplayer164.guest.joined",
-                            "已加入房间！请在局域网列表中双击「Terracotta Lobby」加入。备用地址：%s",
-                            state.url == null ? "-" : state.url);
+                    joining = false;
+                    String address = normalizeAddress(state.url);
+                    ServerAddress serverAddress = ServerAddress.func_78860_a(address);
+                    connectHost = serverAddress.getIP();
+                    connectPort = serverAddress.getPort();
+                    connectRequested = true;
+                    status = I18n.trf("multiplayer164.guest.auto_connecting",
+                            "已加入房间，正在自动连接本地大厅：%s", address);
                 } else if (state.isException()) {
                     joining = false;
                     errorMessage = describeException(state.exceptionType);
@@ -129,6 +139,11 @@ public class GuiJoinRoom extends GuiScreen {
 
     @Override
     public void updateScreen() {
+        if (connectRequested && connectHost != null && connectPort > 0) {
+            connectRequested = false;
+            this.mc.displayGuiScreen(new GuiConnecting(parentScreen, this.mc, connectHost, connectPort));
+            return;
+        }
         this.codeField.updateCursorCounter();
     }
 
@@ -164,6 +179,23 @@ public class GuiJoinRoom extends GuiScreen {
             return this.mc.thePlayer.username;
         }
         return this.mc.getSession() != null ? this.mc.getSession().getUsername() : "Player";
+    }
+
+    private static String normalizeAddress(String url) {
+        String address = url == null ? "" : url.trim();
+        if (address.startsWith("mc://")) {
+            address = address.substring("mc://".length());
+        } else {
+            int scheme = address.indexOf("://");
+            if (scheme >= 0) {
+                address = address.substring(scheme + 3);
+            }
+        }
+        int slash = address.indexOf('/');
+        if (slash >= 0) {
+            address = address.substring(0, slash);
+        }
+        return address.length() == 0 ? "127.0.0.1" : address;
     }
 
     private static String describeProgress(TerracottaState.Kind kind) {

@@ -13,6 +13,7 @@ multiplayer164.guest.empty=Please enter an invite code.
 multiplayer164.guest.connecting=Joining room...
 multiplayer164.guest.starting=Establishing connection...
 multiplayer164.guest.joined=Joined! Double-click "Terracotta Lobby" in the LAN list to play. Backup address: %s
+multiplayer164.guest.auto_connecting=Joined! Connecting to the local lobby: %s
 multiplayer164.region=Note: the multiplayer service is currently available only in Chinese Mainland.
 multiplayer164.error.platform=Multiplayer is not supported on this platform (64-bit Windows only).
 multiplayer164.error.generic=Multiplayer error: %s
