@@ -5,6 +5,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,6 +78,25 @@ public final class TerracottaClient {
             query.add(new String[]{"public_nodes", node});
         }
         HttpUtil.get(HttpUtil.withQuery(base("/state/guesting"), query));
+    }
+
+    /** Asks the Terracotta core process to exit cleanly. */
+    public void shutdown() throws IOException {
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL(base("/panic?peaceful=true")).openConnection();
+            conn.setConnectTimeout(1000);
+            conn.setReadTimeout(1000);
+            conn.setRequestMethod("GET");
+            // The endpoint exits the Terracotta process from inside the handler, so the
+            // connection may be closed before a full response is delivered. Trigger the
+            // request and let callers ignore any IOException as a successful best-effort.
+            conn.getResponseCode();
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
     }
 
     /** Fetches the Terracotta log text for troubleshooting. */

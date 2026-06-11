@@ -47,6 +47,10 @@ public class GuiJoinRoom extends GuiScreen {
     @Override
     protected void actionPerformed(GuiButton button) {
         if (button.id == BUTTON_CANCEL) {
+            if (joining && !joined) {
+                joining = false;
+                TerracottaManager.getInstance().reset();
+            }
             this.mc.displayGuiScreen(parentScreen);
         } else if (button.id == BUTTON_JOIN) {
             attemptJoin();
@@ -91,6 +95,15 @@ public class GuiJoinRoom extends GuiScreen {
                 errorMessage = GuiHostRoom.mapError(message);
             }
         });
+    }
+
+    @Override
+    public void onGuiClosed() {
+        if (joining && !joined) {
+            joining = false;
+            TerracottaManager.getInstance().reset();
+        }
+        super.onGuiClosed();
     }
 
     @Override

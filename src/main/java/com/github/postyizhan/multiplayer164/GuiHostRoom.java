@@ -20,6 +20,7 @@ public class GuiHostRoom extends GuiScreen {
     private volatile String status;
     private volatile String inviteCode;
     private volatile String errorMessage;
+    private boolean hostingStarted;
 
     public GuiHostRoom(GuiScreen parent, String playerName) {
         this.parentScreen = parent;
@@ -36,7 +37,10 @@ public class GuiHostRoom extends GuiScreen {
         // Done/back button (ID 202)
         this.buttonList.add(new GuiButton(202, this.width / 2 - 100, this.height - 28,
                 I18n.tr("gui.done", "完成")));
-        startHosting();
+        if (!hostingStarted) {
+            hostingStarted = true;
+            startHosting();
+        }
     }
 
     private void startHosting() {

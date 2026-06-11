@@ -119,6 +119,16 @@ public final class TerracottaProcess {
     }
 
     /**
+     * Stops the process handle we own and also tries to kill same-named Terracotta
+     * strays. This is used only during game shutdown as a fallback after asking the
+     * HTTP core to exit cleanly.
+     */
+    public synchronized void stopAll() {
+        stop();
+        killStrayProcesses();
+    }
+
+    /**
      * Best-effort kill of any stray Terracotta processes with the same executable name,
      * left over from a previous run. Prevents the singleton mutex from forcing us into
      * secondary mode against a dirty holder. Failures are ignored.
