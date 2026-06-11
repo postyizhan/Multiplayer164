@@ -19,6 +19,7 @@ public class GuiHostRoom extends GuiScreen {
 
     private volatile String status;
     private volatile String inviteCode;
+    private volatile String pendingChatInviteCode;
     private volatile String errorMessage;
     private boolean hostingStarted;
 
@@ -51,6 +52,9 @@ public class GuiHostRoom extends GuiScreen {
         TerracottaManager.getInstance().host(playerName, new TerracottaManager.Callback() {
             public void onState(TerracottaState state) {
                 if (state.kind == TerracottaState.Kind.HOST_OK && state.room != null) {
+                    if (!state.room.equals(inviteCode)) {
+                        pendingChatInviteCode = state.room;
+                    }
                     inviteCode = state.room;
                     status = null;
                     GuiScreen.setClipboardString(state.room);
@@ -75,6 +79,25 @@ public class GuiHostRoom extends GuiScreen {
             }
         } else if (button.id == 202) {
             this.mc.displayGuiScreen(parentScreen);
+        }
+    }
+
+    @Override
+    public void updateScreen() {
+        String code = pendingChatInviteCode;
+        if (code != null) {
+            pendingChatInviteCode = null;
+            printInviteToChat(code);
+        }
+        super.updateScreen();
+    }
+
+    private void printInviteToChat(String code) {
+        if (this.mc != null && this.mc.ingameGUI != null) {
+            String copyUrl = GuiCopyChat.copyUrl(code);
+            this.mc.ingameGUI.getChatGUI().printChatMessage(I18n.trf(
+                    "multiplayer164.host.chat_invite",
+                    "§a联机房间已创建，邀请码：§e%s §a点击复制：§b§n%s", code, copyUrl));
         }
     }
 

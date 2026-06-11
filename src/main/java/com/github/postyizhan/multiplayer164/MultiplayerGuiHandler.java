@@ -2,6 +2,7 @@ package com.github.postyizhan.multiplayer164;
 
 import java.lang.reflect.Field;
 
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.gui.GuiScreen;
@@ -19,6 +20,8 @@ public class MultiplayerGuiHandler {
         if (event.gui instanceof GuiMultiplayer && !(event.gui instanceof GuiCustomMultiplayer)) {
             GuiScreen parent = readParent((GuiMultiplayer) event.gui);
             event.gui = new GuiCustomMultiplayer(parent);
+        } else if (event.gui instanceof GuiChat && !(event.gui instanceof GuiCopyChat)) {
+            event.gui = new GuiCopyChat(readDefaultChatText((GuiChat) event.gui));
         }
     }
 
@@ -41,6 +44,22 @@ public class MultiplayerGuiHandler {
             // fall through
         }
         return new GuiMainMenu();
+    }
+
+    private static String readDefaultChatText(GuiChat gui) {
+        try {
+            Field f = findField(GuiChat.class, "defaultInputFieldText");
+            if (f != null) {
+                f.setAccessible(true);
+                Object value = f.get(gui);
+                if (value instanceof String) {
+                    return (String) value;
+                }
+            }
+        } catch (Exception e) {
+            // fall through
+        }
+        return "";
     }
 
     private static Field findField(Class<?> clazz, String... names) {
