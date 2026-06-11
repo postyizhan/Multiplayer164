@@ -2,7 +2,7 @@
   {
     "modid": "Multiplayer164",
     "name": "Multiplayer164",
-    "description": "Enhanced LAN sharing and configuration for Minecraft 1.6.4",
+    "description": "Enhanced LAN sharing plus free public multiplayer for Minecraft 1.6.4, powered by the Terracotta (陶瓦联机) P2P core. Includes Terracotta, © burningtnt, AGPL-3.0 (https://github.com/burningtnt/Terracotta).",
     "version": "1.0.0",
     "mcversion": "1.6.4",
     "url": "https://github.com/postyizhan/Multiplayer164",

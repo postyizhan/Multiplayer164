@@ -22,6 +22,7 @@ eclipse/
 run/
 logs/
 crash-reports/
+HMCL/
 
 # OS
 .DS_Store
@@ -44,6 +45,9 @@ config/*.cfg
 # 保留特定的jar文件
 !gradle/wrapper/gradle-wrapper.jar
 !libs/*.jar
+# 本地 Voldeloom 插件仓库（上游 repo.sleeping.town 在本环境不可达）
+!libs/**/*.jar
+!libs/**/*.pom
 
 # Build artifacts
 *.log

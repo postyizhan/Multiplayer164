@@ -85,9 +85,13 @@ public class GuiCustomShareToLan extends GuiShareToLan {
 
             // Start LAN
             String result = LanServerController.startLan(this.mc, port, this.gameMode, this.allowCommands, this.pvpEnabled);
-            
+
             if (result != null) {
                 this.mc.ingameGUI.getChatGUI().printChatMessage(StatCollector.translateToLocalFormatted("commands.publish.started", result));
+                // LAN world is open — hand off to the Terracotta host flow to get a public invite code.
+                String playerName = resolvePlayerName();
+                this.mc.displayGuiScreen(new GuiHostRoom(this.parentScreen, playerName));
+                return;
             } else {
                 this.mc.ingameGUI.getChatGUI().printChatMessage(StatCollector.translateToLocal("commands.publish.failed"));
             }
@@ -141,5 +145,16 @@ public class GuiCustomShareToLan extends GuiShareToLan {
     protected void mouseClicked(int par1, int par2, int par3) {
         super.mouseClicked(par1, par2, par3);
         this.portField.mouseClicked(par1, par2, par3);
+    }
+
+    /** Resolves the multiplayer display name: configured name, else MC username. */
+    private String resolvePlayerName() {
+        if (ConfigHandler.lastPlayerName != null && !ConfigHandler.lastPlayerName.trim().isEmpty()) {
+            return ConfigHandler.lastPlayerName.trim();
+        }
+        if (this.mc.thePlayer != null) {
+            return this.mc.thePlayer.username;
+        }
+        return this.mc.getSession() != null ? this.mc.getSession().getUsername() : "Player";
     }
 }

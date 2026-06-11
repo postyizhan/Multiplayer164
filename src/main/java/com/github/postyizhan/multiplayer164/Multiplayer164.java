@@ -16,9 +16,15 @@ public class Multiplayer164 {
     public void preInit(FMLPreInitializationEvent event) {
         // Initialize Config
         ConfigHandler.init(event.getSuggestedConfigurationFile());
-        
-        // Register event handler for GUI
+
+        // Initialize the Terracotta multiplayer manager with the game directory.
+        // The config dir is <gameDir>/config, so its parent is the game directory.
+        com.github.postyizhan.multiplayer164.terracotta.TerracottaManager.getInstance()
+                .init(event.getModConfigurationDirectory().getParentFile());
+
+        // Register event handlers for the custom GUIs.
         MinecraftForge.EVENT_BUS.register(new LanGuiHandler());
+        MinecraftForge.EVENT_BUS.register(new MultiplayerGuiHandler());
     }
     
     @EventHandler
