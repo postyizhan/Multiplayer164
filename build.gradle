@@ -1,45 +1,29 @@
-buildscript {
-    repositories {
-        // Local copy of the Voldeloom plugin (its upstream repo.sleeping.town is
-        // unreachable from this environment). The jar+pom live in libs/voldeloom-repo.
-        maven { url "${rootDir}/libs/voldeloom-repo" }
-        mavenCentral()
-        maven {
-            name = "forge"
-            url = "https://maven.minecraftforge.net/"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-        maven { url "https://maven.fabricmc.net" }
-    }
-    dependencies {
-        classpath "agency.highlysuspect:voldeloom:2.4-SNAPSHOT"
-    }
-}
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'java'
+    id 'net.minecraftforge.gradle' version "7.0.28"
+    id("net.minecraftforge.renamer") version "1.1.2"
 }
 
-apply plugin: 'agency.highlysuspect.voldeloom'
-
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 tasks.withType(JavaCompile) {
+    options.fork = true
     options.encoding = 'UTF-8'
+    options.compilerArgs += ['-source', '1.6', '-target', '1.6']
 }
 
 version = "2.0"
 group = "com.github.postyizhan.multiplayer164"
-archivesBaseName = "Multiplayer164"
+base.archivesName = "Multiplayer164"
 
 repositories {
-    // repo.maven.apache.org returns 403 in this environment; use reachable mirrors.
-    maven { url "https://maven.aliyun.com/repository/public/" }
-    maven { url "https://repo1.maven.org/maven2/" }
     mavenCentral()
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    flatDir(
+            dir : 'libs'
+    )
 }
 
 configurations {
@@ -47,17 +31,29 @@ configurations {
     implementation.extendsFrom shade
 }
 
+minecraft {
+    mappings channel: 'snapshot', version: '20130918-1.6.3'
+
+    runs {
+        register('client') {
+            workingDir = file('runs/main/client/')
+            environment.put("tweakClass", "cpw.mods.fml.common.launcher.FMLTweaker")
+            jvmArgs "-Dfml.ignoreInvalidMinecraftCertificates=true"
+        }
+        register('server') {
+            workingDir = file('runs/main/server/')
+            environment.put("tweakClass", "cpw.mods.fml.common.launcher.FMLTweaker")
+            jvmArgs "-Dfml.ignoreInvalidMinecraftCertificates=true"
+        }
+    }
+}
+
 dependencies {
-    minecraft "com.mojang:minecraft:1.6.4"
-    forge "net.minecraftforge:forge:1.6.4-9.11.1.1345:universal"
-    mappings "net.minecraftforge:forge:1.6.4-9.11.1.1345:src@zip"
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
 
     // Multiplayer (Terracotta) support — bundled into the final jar via `shade`.
     // Pure-Java, Java 7 compatible, no native code.
     shade "com.google.code.gson:gson:2.8.9"
-    // commons-compress removed: it is a Java 8 multi-release jar (module-info.class)
-    // that the 1.6.4 remapper (ASM4) cannot process. tar.gz is handled with a
-    // small hand-written tar reader + JDK GZIPInputStream instead.
 
     testImplementation "junit:junit:4.13.2"
     testImplementation "com.google.code.gson:gson:2.8.9"
@@ -83,15 +79,12 @@ jar {
             exclude 'META-INF', 'META-INF/**'
         }
     }
-    classifier = 'universal'
 }
 
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    configurations.shade.each { dep ->
-        from(project.zipTree(dep)) {
-            exclude 'META-INF', 'META-INF/**'
-        }
-    }
-    classifier = 'dev'
+renamer.mappings.from minecraft.dependency.toSrgFile
+
+renamer.classes(tasks.named('jar', Jar)) {
+    map.from minecraft.dependency.toSrgFile
+
+    archiveClassifier = 'srg'
 }
